@@ -15,8 +15,8 @@ sha256sums=('d1fa8ee1a3a79d42266db41e470e8d31075de0ebd36bc9b424648c4d100c4105'
 options=('!buildflags')
 
 build() {
-    export PERL_MM_OPT=''
-    export PERL_MB_OPT=''
+	export PERL_MM_OPT=''
+	export PERL_MB_OPT=''
 	cd buildroot-${BR2_RELEASE}
 	make BR2_EXTERNAL=../linux2boot-${pkgver}/buildroot/ pinebook_pro_defconfig
 	make all
