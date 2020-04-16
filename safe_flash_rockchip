@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+
+MTD_DEVICE="$1"
+IMAGE_FILE="$2"
+
+erro() {
+	( 1>&2 echo "$@" )
+}
+
+die() {
+	erro "$@"
+	exit 1
+}
+
+usage() {
+	binary="$1"
+	erro
+	erro "This script installs a linux2boot image to an mtd device"
+	erro "$binary <mtd device> <flash image>"
+	exit 1
+}
+
+remove_signature() {
+	erro "Removing Rockchip boot signature..."
+	flashcp "$TMPDIR"/empty_signature.bin "$MTD_DEVICE"
+}
+
+trap_cleanup() {
+#	rm -rf "$TMPDIR"
+	trap - EXIT INT TERM 
+}
+
+trap_nuke_signature() {
+	erro "Something failed or was cancelled"
+	remove_signature
+	trap_cleanup
+}
+
+dd_silent() {
+	dd "$@" 2> /dev/null
+}
+
+do_sha256sum() {
+	sha256sum "$1" | cut -d' ' -f1
+}
+
+do_sha256sum_size() {
+	dd_silent if="$1" bs="$2" count=1 | sha256sum | cut -d' ' -f1
+}
+
+if [[ "$EUID" -ne 0 ]]; then
+	erro "This script needs elevated priviliges, please run as root"
+	usage "$0"
+fi
+
+if ! [[ -e "$MTD_DEVICE" ]]; then
+	erro "MTD device '$MTD_DEVICE' does not exist"
+	usage "$0"
+fi
+
+if ! [[ -f "$IMAGE_FILE" ]]; then
+	erro "Image file '$IMAGE_FILE' does not exist"
+	usage "$0"
+fi
+
+flash_unlock "$MTD_DEVICE"
+
+TMPDIR="$(mktemp -d)"
+trap trap_cleanup EXIT INT TERM 
+
+cp "$IMAGE_FILE" "$TMPDIR"/image.bin
+cp "$TMPDIR"/image.bin "$TMPDIR"/image_no_signature.bin
+dd_silent if=/dev/zero bs=4k count=1 conv=notrunc of="$TMPDIR"/image_no_signature.bin
+dd_silent if="$TMPDIR"/image.bin bs=4k count=1 of="$TMPDIR"/signature.bin
+dd_silent if=/dev/zero bs=4k count=1 of="$TMPDIR"/empty_signature.bin
+
+shasum_image_no_signature="$(do_sha256sum "$TMPDIR"/image_no_signature.bin)"
+shasum_image="$(do_sha256sum "$TMPDIR"/image.bin)"
+image_size="$(wc -c < "$TMPDIR"/image.bin)"
+
+erro "Erasing Rockchip boot signature..."
+flashcp "$TMPDIR"/empty_signature.bin "$MTD_DEVICE"
+trap trap_nuke_signature EXIT INT TERM 
+
+erro "Writing image..."
+flashcp "$TMPDIR"/image_no_signature.bin "$MTD_DEVICE"
+erro "Verifying image..."
+shasum_flash="$(do_sha256sum_size "$MTD_DEVICE" "$image_size")"
+if [[ "$shasum_flash" != "$shasum_image_no_signature" ]]; then
+	die "ERROR: Written flash content did not verify correctly"
+fi 
+
+erro "Writing Rockchip boot signature..."
+flashcp "$TMPDIR"/signature.bin "$MTD_DEVICE"
+erro "Verifying image and signature..."
+shasum_flash="$(do_sha256sum_size "$MTD_DEVICE" "$image_size")"
+if [[ "$shasum_flash" != "$shasum_image" ]]; then
+	die "ERROR: Written flash content did not verify correctly"
+fi 
+
+erro "Done."
+
+trap_cleanup
