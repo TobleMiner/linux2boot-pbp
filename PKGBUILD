@@ -7,7 +7,7 @@ arch=('any')
 url='https://github.com/TobleMiner/linux2boot'
 license=('AGPL')
 makedepends=('make' 'binutils' 'gcc' 'patch' 'perl' 'gzip' 'bzip2' 'tar' 'cpio'
-	 'unzip' 'rsync' 'bc' 'wget' 'git' 'python')
+	 'unzip' 'rsync' 'bc' 'wget' 'git' 'python' 'arm-none-eabi-gcc')
 source=("https://buildroot.org/downloads/buildroot-${BR2_RELEASE}.tar.gz"
 	"https://github.com/TobleMiner/linux2boot/archive/v${pkgver}.tar.gz")
 sha256sums=('d1fa8ee1a3a79d42266db41e470e8d31075de0ebd36bc9b424648c4d100c4105'
