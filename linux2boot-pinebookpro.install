@@ -1,0 +1,68 @@
+MTD_FLASH_SIZE=$((16 * 1024 * 1024))
+MTD_SINGLE="$(cat << EOF
+dev:    size   erasesize  name
+mtd0: 01000000 00001000 "spi0.0"
+EOF
+)"
+FLASH_IMAGE='/usr/share/linux2boot/pinebook-pro/nor-flash.img'
+
+erro() {
+	( 1>&2 echo "$@" )
+}
+
+die() {
+	erro "$@"
+	exit 1
+}
+
+mtd_install_single() {
+	image_size="$(wc -c < "$FLASH_IMAGE")"
+	if [[ "$image_size" == "$MTD_FLASH_SIZE" ]]; then
+		safe_flash_rockchip /dev/mtd0 "$FLASH_IMAGE"
+	else
+		erro "Invalid flash image size, refusing to flash"
+	fi
+}
+
+mtd_install() {
+	set -e
+
+	mtdparts="$(cat /proc/mtd)"
+	if [[ "$mtdparts" == "$MTD_SINGLE" ]]; then
+		mtd_install_single
+	else
+		erro "Unknown flash layout, please install linux2boot manually"
+	fi
+	
+	set +e
+}
+
+post_install() {
+	mtd_install
+}
+
+post_upgrade() {
+	mtd_install
+}
+
+mtd_uninstall_single() {
+	echo "Erasing Rockchip boot signature..."
+	flash_erase -u /dev/mtd0 0 1
+}
+
+mtd_uninstall() {
+	set -e
+
+	mtdparts="$(cat /proc/mtd)"
+	if [[ "$mtdparts" == "$MTD_SINGLE" ]]; then
+		mtd_uninstall_single
+	else
+		erro "Unknown flash layout, please remove linux2boot manually"
+	fi
+	
+	set +e
+}
+
+post_remove() {
+	mtd_uninstall
+}
