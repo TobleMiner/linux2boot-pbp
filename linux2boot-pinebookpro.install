@@ -18,6 +18,7 @@ die() {
 mtd_install_single() {
 	image_size="$(wc -c < "$FLASH_IMAGE")"
 	if [[ "$image_size" == "$MTD_FLASH_SIZE" ]]; then
+		echo "Installing linux2boot to /dev/mtd0. This will take several minutes"
 		safe_flash_rockchip /dev/mtd0 "$FLASH_IMAGE"
 	else
 		erro "Invalid flash image size, refusing to flash"

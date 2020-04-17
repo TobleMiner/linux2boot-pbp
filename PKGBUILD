@@ -1,6 +1,6 @@
 pkgname=linux2boot-pinebookpro
 pkgver=0.5
-pkgrel=1
+pkgrel=2
 BR2_RELEASE=2020.02
 pkgdesc='Builds linux2boot for the Pinebook Pro'
 arch=('any')
