@@ -8,7 +8,7 @@ url='https://github.com/TobleMiner/linux2boot'
 license=('AGPL')
 install=${pkgname}.install
 makedepends=('make' 'binutils' 'gcc' 'patch' 'perl' 'gzip' 'bzip2' 'tar' 'cpio'
-	 'unzip' 'rsync' 'bc' 'wget' 'git' 'python')
+	 'unzip' 'rsync' 'bc' 'wget' 'git' 'python' 'mtools' 'dosfstools')
 depends=('mtd-utils')
 source=("https://buildroot.org/downloads/buildroot-${BR2_RELEASE}.tar.gz"
 	"https://github.com/TobleMiner/linux2boot/archive/v${pkgver}.tar.gz"

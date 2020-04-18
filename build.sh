@@ -6,7 +6,7 @@ cd "$(dirname "$(readlink -f "$0")")"
 
 if [[ "$EUID" -eq 0 ]]; then
 	pacman --noconfirm -Syu
-	pacman --noconfirm -S base-devel arm-none-eabi-gcc cpio bc git rsync perl python sudo mtd-utils unzip wget
+	pacman --noconfirm -S base-devel arm-none-eabi-gcc cpio bc git rsync perl python sudo mtd-utils unzip wget mtools dosfstools
 	useradd build
 	chown -R build:build .
 	sudo -u build ./build.sh
