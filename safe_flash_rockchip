@@ -29,7 +29,7 @@ remove_signature() {
 
 trap_cleanup() {
 #	rm -rf "$TMPDIR"
-	trap - EXIT INT TERM 
+	trap - EXIT INT TERM
 }
 
 trap_nuke_signature() {
@@ -68,7 +68,7 @@ fi
 flash_unlock "$MTD_DEVICE"
 
 TMPDIR="$(mktemp -d)"
-trap trap_cleanup EXIT INT TERM 
+trap trap_cleanup EXIT INT TERM
 
 cp "$IMAGE_FILE" "$TMPDIR"/image.bin
 cp "$TMPDIR"/image.bin "$TMPDIR"/image_no_signature.bin
@@ -82,15 +82,15 @@ image_size="$(wc -c < "$TMPDIR"/image.bin)"
 
 erro "Erasing Rockchip boot signature..."
 flashcp "$TMPDIR"/empty_signature.bin "$MTD_DEVICE"
-trap trap_nuke_signature EXIT INT TERM 
+trap trap_nuke_signature EXIT INT TERM
 
 erro "Writing image..."
-flashcp "$TMPDIR"/image_no_signature.bin "$MTD_DEVICE"
+flashcp -v "$TMPDIR"/image_no_signature.bin "$MTD_DEVICE"
 erro "Verifying image..."
 shasum_flash="$(do_sha256sum_size "$MTD_DEVICE" "$image_size")"
 if [[ "$shasum_flash" != "$shasum_image_no_signature" ]]; then
 	die "ERROR: Written flash content did not verify correctly"
-fi 
+fi
 
 erro "Writing Rockchip boot signature..."
 flashcp "$TMPDIR"/signature.bin "$MTD_DEVICE"
@@ -98,7 +98,7 @@ erro "Verifying image and signature..."
 shasum_flash="$(do_sha256sum_size "$MTD_DEVICE" "$image_size")"
 if [[ "$shasum_flash" != "$shasum_image" ]]; then
 	die "ERROR: Written flash content did not verify correctly"
-fi 
+fi
 
 erro "Done."
 
