@@ -76,6 +76,15 @@ jobs:
         with:
           name: ${{ needs.build.outputs.pkgfile }}
 
+      - name: Copious amount of debug ls
+        run: |
+          ls -la .
+          ls -la linux2boot-pbp || true
+          ls -la release_info.txt || true
+          ls -la linux2boot-pbp/release_info.txt || true
+          ls -la linux2boot-pinebookpro-0.7-1-any.pkg.tar.xz || true
+          ls -la linux2boot-pbp/linux2boot-pinebookpro-0.7-1-any.pkg.tar.xz || true
+
       # Upload actual release
       # build job is likely to take more than an hour, secrets.GITHUB_TOKEN would have expired
       - name: Release build artifacts
