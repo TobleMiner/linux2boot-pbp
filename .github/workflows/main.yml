@@ -50,6 +50,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: build
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
@@ -73,7 +74,6 @@ jobs:
       # build job is likely to take more than an hour, secrets.GITHUB_TOKEN would have expired
       - name: Release build artifacts
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           body_path: release_info.txt
           files: |
