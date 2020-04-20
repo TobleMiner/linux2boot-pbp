@@ -86,7 +86,7 @@ jobs:
         with:
           body_path: release_info.txt
           files: |
-            "*.pkg.tar.xz"
+            ${{ needs.build.outputs.pkgfile }}
             SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
