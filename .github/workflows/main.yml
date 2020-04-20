@@ -34,25 +34,24 @@ jobs:
       - name: Upload shasums
         uses: actions/upload-artifact@v2-preview
         with:
-          name: shasums
+          name: SHA256SUMS
           path: SHA256SUMS
 
       - name: Upload release info
         uses: actions/upload-artifact@v1
         with:
-          name: release-info
+          name: release_info.txt
           path: release_info.txt
-
-      - name: Upload package
-        uses: actions/upload-artifact@v2-preview
-        with:
-          name: package
-          path: "*.pkg.tar.xz"
 
       - id: pkgname
         name: Find package name
         run: echo "::set-output name=pkgfile::$(ls *.pkg.tar.xz)"
 
+      - name: Upload package
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: ${{ steps.pkgname.outputs.pkgfile }}
+          path: ${{ steps.pkgname.outputs.pkgfile }}
 
   release:
     runs-on: ubuntu-latest
@@ -65,20 +64,17 @@ jobs:
       - name: Download shasums
         uses: actions/download-artifact@v1
         with:
-          name: shasums
-          path: SHA256SUMS
+          name: SHA256SUMS
 
       - name: Download release info
         uses: actions/download-artifact@v1
         with:
-          name: release-info
-          path: release_info.txt
+          name: release_info.txt
 
       - name: Download package
         uses: actions/download-artifact@v1
         with:
-          name: package
-          path: ${{ needs.build.outputs.pkgfile }}
+          name: ${{ needs.build.outputs.pkgfile }}
 
       # Upload actual release
       # build job is likely to take more than an hour, secrets.GITHUB_TOKEN would have expired
